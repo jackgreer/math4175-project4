@@ -13,6 +13,22 @@ pi_s = {0b000: 0b110, 0b001: 0b101, 0b010: 0b001, 0b011: 0b000,\
 pi_s_inv = {0b000: 0b011, 0b001: 0b010, 0b010: 0b101, 0b011: 0b100,\
             0b100: 0b111, 0b101: 0b001, 0b110: 0b000, 0b111: 0b110}
 
+# List of plaintext and ciphertext pairs for problem 4
+# Note: the only relevant right 4-tuples are derived from pairs 2, 4, and 6,
+# (indices 1, 3, and 5) because those are the only pairs where the first three
+# bits of y match with the first three bits of y* (in other words, the first
+# three bits of y' = 0b000). We need these bits of y' to be 0 because we care
+# about paths that end at H4, H5, and/or H6, but not H1, H2, and H3.
+# x_list = ["100111", "000111", "001100", "011000", "001000", "011010"]
+# x_star_list = ["100110", "000110", "001101", "011001", "001001", "011011"]
+# y_list = ["100100", "110010", "111001", "011101", "001101", "101001"]
+# y_star_list = ["1111110","110110","100000","011111","000011","101000"]
+
+x_list =      [0b100111, 0b000111, 0b001100, 0b011000, 0b001000, 0b011010]
+x_star_list = [0b100110, 0b000110, 0b001101, 0b011001, 0b001001, 0b011011]
+y_list =      [0b100100, 0b110010, 0b111001, 0b011101, 0b001101, 0b101001]
+y_star_list = [0b111110, 0b110110, 0b100000, 0b011111, 0b000011, 0b101000]
+
 # 1. Make a difference distribution table, analogous to Difference Distribution Table given in
 # the slide 7 of section 4.4 in class notes, for the given S-box.
 
@@ -45,12 +61,55 @@ print(tabulate(difference_distribution_table,\
 # Sketch all these three trials clearly and upload them as pdf files.
 
 
-# Given a fixed x' = 000 001
+u_prime = [0 for i in range(6)]
+count1 = 0
+count2 = 0
+count3 = 0
+weighted_average_count = [0 for i in range(8)]
 
-# We're considering the cases where
-# H = 000001 with probability 1/4
-# H = 000011 with probability 1/8
-# H = 000111 with probability 1/8
-# Out of our candidates, we have three eligible right 4 tuples:
-# x        | 
-# 
+# Prepare
+diff_spn_q5_results = [[0 for col in range(9)] for row in range(5)]
+
+
+for key_candidate in range(8):
+    # For each of our four right tuples, take
+    # for i in range
+    for i in range(6):
+        # Select three suitable righ 4-tuples from our plaintext-ciphertext pairs
+        if((y_list[i] & 0b111000) == (y_star_list[i] & 0b111000)):
+            v = key_candidate ^ (y_list[i] & 0b111)
+            u = pi_s_inv[v]
+            v_star = key_candidate ^ (y_star_list[i] & 0b111)
+            u_star = pi_s_inv[v_star]
+            u_prime[i] = u ^ u_star
+            if(u_prime[i] == 0b001):
+                count1 += 1
+                diff_spn_q5_results[1][key_candidate + 1] += 1
+            elif(u_prime[i] == 0b011):
+                count2 += 1
+                diff_spn_q5_results[2][key_candidate + 1] += 1
+            elif(u_prime[i] == 0b111):
+                count3 += 1
+                diff_spn_q5_results[3][key_candidate + 1] += 1
+    weighted_average_count[key_candidate] = (0.25 * count1) + \
+                                            (0.125 * count2) + \
+                                            (0.125 * count3)
+    diff_spn_q5_results[4][key_candidate + 1] = (0.25 * count1) + \
+                                            (0.125 * count2) + \
+                                            (0.125 * count3)
+                                            
+    # Reset the counts for the next key guess
+    count1 = 0
+    count2 = 0
+    count3 = 0
+
+# Print out the results for Question 5 in a final tabular format
+diff_spn_q5_results[0] = ["Key Guess", 0, 1, 2, 3, 4, 5, 6, 7]
+diff_spn_q5_results[1][0] = "Trail 1 Count"
+diff_spn_q5_results[2][0] = "Trail 2 Count"
+diff_spn_q5_results[3][0] = "Trail 3 Count"
+diff_spn_q5_results[4][0] = "Weighted Avg (C)"
+
+# From this, we can tell that the last three bits of the key are 0b011
+# Beautiful mang
+print(tabulate(diff_spn_q5_results, tablefmt = "rounded_grid"))
