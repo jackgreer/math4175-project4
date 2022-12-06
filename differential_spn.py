@@ -48,6 +48,7 @@ for x_prime in range(8):
         
         difference_distribution_table[x_prime][y_prime] += 1
 
+print("Difference Distribution Table:")
 print(tabulate(difference_distribution_table,\
                 headers=[x for x in range(8)],\
                     tablefmt="fancy_grid", showindex="always"))
@@ -75,8 +76,13 @@ for key_candidate in range(8):
     # For each of our four right tuples, take
     # for i in range
     for i in range(6):
-        # Select three suitable righ 4-tuples from our plaintext-ciphertext pairs
-        if((y_list[i] & 0b111000) == (y_star_list[i] & 0b111000)):
+        # Select three suitable right 4-tuples from our plaintext-ciphertext pairs
+        # A right 4-tuple has:
+        # x ^ x* = x' = 0b000001 (which is true for all of our given plaintext)
+        # y ^ y* = y' = 0b000--- (in other words, the first three bits of y and y*
+        # match each other)
+        if((x_list[i] ^ x_star_list[i] == 0b000001) and \
+            (y_list[i] & 0b111000) == (y_star_list[i] & 0b111000)):
             v = key_candidate ^ (y_list[i] & 0b111)
             u = pi_s_inv[v]
             v_star = key_candidate ^ (y_star_list[i] & 0b111)
@@ -104,6 +110,7 @@ for key_candidate in range(8):
     count3 = 0
 
 # Print out the results for Question 5 in a final tabular format
+print("Question 5 Results:")
 diff_spn_q5_results[0] = ["Key Guess", 0, 1, 2, 3, 4, 5, 6, 7]
 diff_spn_q5_results[1][0] = "Trail 1 Count"
 diff_spn_q5_results[2][0] = "Trail 2 Count"
@@ -113,3 +120,4 @@ diff_spn_q5_results[4][0] = "Weighted Avg (C)"
 # From this, we can tell that the last three bits of the key are 0b011
 # Beautiful mang
 print(tabulate(diff_spn_q5_results, tablefmt = "rounded_grid"))
+print("The last three bits of the key must be 0b011!")
